@@ -17,10 +17,17 @@ contract CompactSwapDecoder {
         address outputReceiver;
     }
 
+    struct swapCompactInfo {
+        swapTokenInfo tokenInfo;
+        address executor;
+        uint32 referralCode;
+        bytes pathDefinition;
+    }
+
     function decodeCompactSwap(
         address _receiver,
         bytes calldata data
-    ) public view returns (swapTokenInfo memory) {
+    ) public view returns (swapCompactInfo memory) {
         swapTokenInfo memory tokenInfo;
 
         address executor;
@@ -145,6 +152,6 @@ contract CompactSwapDecoder {
             }
         }
 
-        return tokenInfo;
+        return swapCompactInfo(tokenInfo, executor, referralCode, pathDefinition);
     }
 }
