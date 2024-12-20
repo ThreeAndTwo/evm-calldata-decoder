@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/**
- * @dev [DEPRECATED] This contract is no longer maintained or updated.
- * @notice This file has been deprecated and will not receive further updates.
- * Last update: [2024.12.20]
- * Reason: [This contract is renamed to OdosRouterV2SwapDecoder.sol and will be removed in the next release.]
- */
-
-contract CompactSwapDecoder {
+library OdosRouterV2SwapDecoder {
+    // https://etherscan.io/address/0xcf5540fffcdc3d510b18bfca6d2b9987b0772559
     address constant _ETH = address(0);
+
+    address public constant _ODOS = 0xCf5540fFFCdC3d510B18bFcA6d2b9987b0772559;
 
     uint256 private constant addressListStart =
         80084422859880547211683076133703299733277748156566366325829078699459944778998;
@@ -31,7 +27,29 @@ contract CompactSwapDecoder {
         bytes pathDefinition;
     }
 
-    function decodeCompactSwap(
+    /// @dev Contains all information needed to describe an intput token for swapMulti
+    struct inputTokenInfo {
+        address tokenAddress;
+        uint256 amountIn;
+        address receiver;
+    }
+    /// @dev Contains all information needed to describe an output token for swapMulti
+    struct outputTokenInfo {
+        address tokenAddress;
+        uint256 relativeValue;
+        address receiver;
+    }
+
+    struct swapMultiCompactInfo {
+        inputTokenInfo[] inputs;
+        outputTokenInfo[] outputs;
+        uint256 valueOutMin;
+        address executor;
+        uint32 referralCode;
+        bytes pathDefinition;
+    }
+
+    function swapCompact(
         address _receiver,
         bytes calldata data
     ) public view returns (swapCompactInfo memory) {
@@ -53,7 +71,7 @@ contract CompactSwapDecoder {
 
                 function getAddress(offset, currPos) -> result, newPos {
                     let inputPos := shr(240, loadFromData(offset, currPos))
-                    
+
                     switch inputPos
                     // Reserve the null address as a special case that can be specified with 2 null bytes
                     case 0x0000 {
@@ -111,7 +129,10 @@ contract CompactSwapDecoder {
 
                 // Load the slippage tolerance and use to get the minimum output amount
                 {
-                    let slippageTolerance := shr(232, loadFromData(dataOffset, pos))
+                    let slippageTolerance := shr(
+                        232,
+                        loadFromData(dataOffset, pos)
+                    )
                     let minOutput := div(
                         mul(outputQuote, sub(0xFFFFFF, slippageTolerance)),
                         0xFFFFFF
@@ -142,14 +163,21 @@ contract CompactSwapDecoder {
                 pos := add(pos, 4)
 
                 // Set the offset and size for the pathDefinition portion of the msg.data
-                let pathLength := mul(shr(248, loadFromData(dataOffset, pos)), 32)
+                let pathLength := mul(
+                    shr(248, loadFromData(dataOffset, pos)),
+                    32
+                )
                 let pathOffset := add(pos, 1)
-                
+
                 pathDefinition := mload(0x40)
                 mstore(pathDefinition, pathLength)
-                
+
                 let i := 0
-                for {} lt(i, pathLength) { i := add(i, 32) } {
+                for {
+
+                } lt(i, pathLength) {
+                    i := add(i, 32)
+                } {
                     mstore(
                         add(add(pathDefinition, 32), i),
                         loadFromData(dataOffset, add(pathOffset, i))
@@ -159,6 +187,22 @@ contract CompactSwapDecoder {
             }
         }
 
-        return swapCompactInfo(tokenInfo, executor, referralCode, pathDefinition);
+        return
+            swapCompactInfo(tokenInfo, executor, referralCode, pathDefinition);
+    }
+
+    // _preExecCheck 给的是 data，而不是结构化数据
+    function swap(
+        bytes calldata data
+    ) public view returns (swapCompactInfo memory) {
+        (
+            swapTokenInfo memory tokenInfo,
+            bytes memory pathDefinition,
+            address executor,
+            uint32 referralCode
+        ) = abi.decode(data[4:], (swapTokenInfo, bytes, address, uint32));
+
+        return
+            swapCompactInfo(tokenInfo, executor, referralCode, pathDefinition);
     }
 }

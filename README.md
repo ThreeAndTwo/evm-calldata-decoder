@@ -1,66 +1,68 @@
-## Foundry
+## EVM Calldata decoder helper
+A Solidity library for decoding DeFi swap transactions from popular DEX protocols.
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+## Overview
 
-Foundry consists of:
+This project provides decoder libraries for parsing and extracting swap transaction data from various decentralized exchanges (DEXs) and L2 networks. The library aims to standardize the decoding process across different protocols and layers.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Supported Protocols
 
-## Documentation
+### Layer 1 DEXs
+- KyberSwap V2
+- Odos Router V2
 
-https://book.getfoundry.sh/
+### Layer 2 Networks (Planned)
+- Arbitrum
+- Optimism
+- zkSync Era
+- Polygon zkEVM
 
-## Usage
+## Features
 
-### Build
+### KyberSwap V2 Decoder Methods
+- `decode(bytes calldata inputData)`: Decode swap transaction data
+  - Returns: (caller, swapDescription, executorData, clientData)
+  - Parameters:
+    - `inputData`: Raw transaction input data
+  - SwapDescription contains:
+    - `srcToken`: Source token address
+    - `dstToken`: Destination token address
+    - `srcReceiver`: Source token receiver
+    - `dstReceiver`: Destination token receiver
+    - `amount`: Amount of source tokens
+    - `minReturnAmount`: Minimum amount of destination tokens
+    - `feeBps`: Fee in basis points
+    
+- `decodeSwapExecutorData(bytes memory _executorData)`: Decode executor data
+  - Returns: (tokens, data)
+  - Parameters:
+    - `_executorData`: Executor-specific data
+  - Used for complex swaps with multiple hops
 
-```shell
-$ forge build
-```
+### Odos Router V2 Decoder Methods
+- `swap(bytes calldata data)`: Decode swap transaction data
+  - Returns: swapCompactInfo struct
+  - Parameters:
+    - `data`: Raw transaction input data
+  - SwapCompactInfo contains:
+    - `tokenIn`: Input token address
+    - `amountIn`: Input amount
+    - `tokenOut`: Output token address
+    - `amountOutMin`: Minimum output amount
+    - `executor`: Swap executor address
+    
+- `swapSimple(bytes calldata data)`: Decode simple swap data
+  - Returns: swapSimpleCompactInfo struct
+  - Parameters:
+    - `data`: Raw transaction input data
+  - Used for direct token-to-token swaps
 
-### Test
+### Common Utilities
+- Token path validation
+- Amount validation
+- Fee calculation helpers
+- Gas usage optimization
 
-```shell
-$ forge test
-```
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+# TODO
+    [ ] L2 Integration Priority by Kyberswap / ODOS
