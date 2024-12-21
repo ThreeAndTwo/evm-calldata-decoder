@@ -191,10 +191,9 @@ library OdosRouterV2SwapDecoder {
             swapCompactInfo(tokenInfo, executor, referralCode, pathDefinition);
     }
 
-    // _preExecCheck 给的是 data，而不是结构化数据
     function swap(
         bytes calldata data
-    ) public view returns (swapCompactInfo memory) {
+    ) public pure returns (swapCompactInfo memory) {
         (
             swapTokenInfo memory tokenInfo,
             bytes memory pathDefinition,
