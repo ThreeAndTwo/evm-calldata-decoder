@@ -94,7 +94,17 @@ This project provides decoder libraries for parsing and extracting swap transact
   - Checked math operations
   - Error handling for insufficient balances
 
+## Deployed Contracts
+
+| Contract Name | Network | Address | Description |
+|--------------|---------|----------|-------------|
+| OdosRouterV2Decoder | Ethereum | [`0xAC610eBF38473e98502Bd07Eb21c0BaCF576f29C`](https://etherscan.io/address/0xAC610eBF38473e98502Bd07Eb21c0BaCF576f29C)  | Odos Router V2 data decoder |
+| AaveV3HealthCalculator | Ethereum | [`0xA361C696BfCDA154006C849d2C8FA0F5bb47469A`](https://etherscan.io/address/0xA361C696BfCDA154006C849d2C8FA0F5bb47469A) | Aave V3 Health Factor On Chain |
+
+
 # TODO
 
 - [ ] L2 Integration Priority by Kyberswap / ODOS
 - [ ] Add support for multi-collateral health factor calculation
+
+
